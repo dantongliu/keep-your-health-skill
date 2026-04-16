@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>森森的健康档案</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;600;700&display=swap');
+  *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;}
+  :root{
+    --mint:#10b981;--mint-light:#d1fae5;--mint-bg:#ecfdf5;
+    --red:#ef4444;--red-light:#fef2f2;
+    --amber:#f59e0b;--amber-light:#fef3c7;
+    --blue:#3b82f6;--blue-light:#dbeafe;
+    --g50:#f8fafc;--g100:#f1f5f9;--g200:#e2e8f0;--g300:#cbd5e1;
+    --g400:#94a3b8;--g500:#64748b;--g600:#475569;--g700:#334155;--g800:#1e293b;--g900:#0f172a;
+    --r:14px;--r-sm:10px;
+  }
+  html{font-size:14px;scroll-behavior:smooth;}
+  body{font-family:'Inter','Noto Sans SC',-apple-system,sans-serif;color:var(--g800);background:var(--g50);-webkit-font-smoothing:antialiased;}
+
+  /* === TOP HEADER === */
+  .hdr{background:linear-gradient(135deg,var(--g900),#1a2332);color:#fff;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+  .hdr-left{display:flex;align-items:center;gap:12px;}
+  .hdr-icon{width:40px;height:40px;border-radius:10px;background:linear-gradient(135deg,var(--mint),#059669);display:flex;align-items:center;justify-content:center;font-size:20px;}
+  .hdr-title{font-size:1.15rem;font-weight:700;}
+  .hdr-sub{font-size:.72rem;color:var(--g400);margin-top:1px;}
+  .hdr-right{text-align:right;}
+  .hdr-date{font-size:.82rem;font-weight:600;color:var(--mint);}
+  .hdr-label{font-size:.68rem;color:var(--g400);}
+
+  .member-view { animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+
+  /* === MAIN === */
+  .main{max-width:1200px;margin:0 auto;padding:16px;}
+
+  /* === INFO BAR === */
+  .info{display:flex;gap:0;background:#fff;border-radius:var(--r);border:1px solid var(--g200);margin-bottom:14px;overflow:hidden;}
+  .info-cell{flex:1;padding:12px 14px;text-align:center;border-right:1px solid var(--g100);}
+  .info-cell:last-child{border-right:none;}
+  .info-label{font-size:.65rem;color:var(--g400);text-transform:uppercase;letter-spacing:.04em;}
+  .info-val{font-size:.92rem;font-weight:600;color:var(--g800);margin-top:2px;}
+
+  /* === CATEGORY TABS === */
+  .cat-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+  .cat-tab{padding:6px 16px;border-radius:50px;font-size:.78rem;font-weight:500;border:1px solid var(--g200);background:#fff;color:var(--g600);cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px;}
+  .cat-tab:hover{border-color:var(--mint);color:var(--mint);}
+  .cat-tab.active{background:var(--g900);color:#fff;border-color:var(--g900);}
+  .cat-tab .ct-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;}
+  .ct-ok{background:var(--mint);}
+  .ct-warn{background:var(--amber);}
+  .ct-bad{background:var(--red);}
+
+  /* === SPLIT PANEL === */
+  .split{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+  .panel{background:#fff;border:1px solid var(--g200);border-radius:var(--r);overflow:hidden;}
+  .panel-head{display:flex;align-items:center;gap:8px;padding:14px 18px;border-bottom:1px solid var(--g100);font-size:.88rem;font-weight:600;color:var(--g800);}
+
+  /* === INDICATOR TABLE === */
+  .ind-tbl{width:100%;border-collapse:collapse;font-size:.82rem;}
+  .ind-tbl th{text-align:left;padding:8px 14px;background:var(--g50);color:var(--g500);font-weight:600;font-size:.72rem;letter-spacing:.04em;border-bottom:1px solid var(--g200);}
+  .ind-tbl td{padding:9px 14px;border-bottom:1px solid var(--g100);vertical-align:middle;}
+  .ind-tbl tr:last-child td{border-bottom:none;}
+  .ind-tbl tr.clickable{cursor:pointer;transition:background .15s;}
+  .ind-tbl tr.clickable:hover{background:var(--g50);}
+  .ind-tbl .v-normal{color:var(--mint);font-weight:600;}
+  .ind-tbl .v-high{color:var(--red);font-weight:600;}
+  .ind-tbl .v-low{color:var(--blue);font-weight:600;}
+  .ind-tbl .v-border{color:var(--amber);font-weight:600;}
+  .badge{padding:2px 8px;border-radius:50px;font-size:.68rem;font-weight:600;display:inline-flex;align-items:center;gap:3px;}
+  .b-ok{background:var(--mint-light);color:#047857;}
+  .b-hi{background:var(--red-light);color:var(--red);}
+  .b-lo{background:var(--blue-light);color:var(--blue);}
+  .b-warn{background:var(--amber-light);color:#92400e;}
+  .arr{font-size:.75rem;color:var(--g400);transition:transform .3s;}
+  tr.expanded .arr{transform:rotate(180deg);}
+
+  /* === DETAIL ROW === */
+  .detail-row td{padding:0 !important;border-bottom:1px solid var(--g100) !important;}
+  .detail-inner{max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .25s,padding .25s;}
+  tr.detail-row.show .detail-inner{max-height:600px;opacity:1;padding:16px 18px;}
+  .d-interp{font-size:.8rem;color:var(--g600);line-height:1.65;}
+  .tip{padding:8px 12px;border-radius:6px;font-size:.78rem;margin-top:6px;}
+  .tip-warn{background:var(--amber-light);border-left:3px solid var(--amber);color:#78350f;}
+  .tip-bad{background:var(--red-light);border-left:3px solid var(--red);color:#7f1d1d;}
+  .tip-ok{background:var(--mint-light);border-left:3px solid var(--mint);color:#064e3b;}
+
+  /* === TREND BARS === */
+  .trend-row{display:flex;align-items:center;gap:8px;padding:10px 18px;border-bottom:1px solid var(--g100);font-size:.8rem;}
+  .trend-row:last-child{border-bottom:none;}
+  .t-label{width:110px;flex-shrink:0;color:var(--g500);font-size:.75rem;}
+  .t-bars{flex:1;display:flex;align-items:center;gap:3px;height:22px;}
+  .t-bar{height:100%;border-radius:4px;min-width:6px;position:relative;cursor:pointer;}
+  .t-bar.grn{background:var(--mint);}
+  .t-bar.amb{background:var(--amber);}
+  .t-bar.red{background:var(--red);}
+  .t-bar.blu{background:var(--blue);}
+  /* Tooltip CSS Required by Rule */
+  .t-bar::after{content:attr(data-tip);position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);padding:3px 7px;background:var(--g900);color:#fff;font-size:.65rem;border-radius:4px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .2s;z-index:10;}
+  .t-bar:hover::after{opacity:1;}
+  .t-val{width:70px;text-align:right;font-weight:600;color:var(--g700);font-size:.78rem;}
+
+  /* === OK CHIPS === */
+  .ok-bar{display:flex;flex-wrap:wrap;gap:8px;padding:12px 18px;}
+  .ok-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border-radius:50px;background:var(--g50);border:1px solid var(--g100);font-size:.78rem;color:var(--g600);}
+  .ok-chip b{font-weight:600;color:var(--g800);}
+  .ok-chip .ok{color:var(--mint);font-weight:600;}
+
+  /* === BOTTOM GRID === */
+  .bottom{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px;}
+  .bcard{background:#fff;border:1px solid var(--g200);border-radius:var(--r);padding:18px;}
+  .bcard-title{display:flex;align-items:center;gap:8px;font-size:.9rem;font-weight:600;color:var(--g800);margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--g100);}
+  .risk{display:flex;gap:10px;padding:10px;border-radius:var(--r-sm);margin-bottom:8px;}
+  .risk-hi{background:var(--red-light);}
+  .risk-md{background:var(--amber-light);}
+  .risk-icon{font-size:1rem;flex-shrink:0;}
+  .risk-t{font-weight:600;font-size:.82rem;color:var(--g800);}
+  .risk-d{font-size:.75rem;color:var(--g600);margin-top:2px;line-height:1.5;}
+  .plan{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid var(--g100);}
+  .plan:last-child{border-bottom:none;}
+  .plan-n{width:24px;height:24px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;background:var(--mint);}
+  .plan-t{font-weight:600;font-size:.82rem;color:var(--g800);}
+  .plan-d{font-size:.75rem;color:var(--g500);margin-top:1px;}
+  .plan-tag{display:inline-block;padding:1px 7px;border-radius:50px;font-size:.65rem;font-weight:600;margin-top:3px;}
+  .tag-u{background:var(--red-light);color:var(--red);}
+  .tag-s{background:var(--amber-light);color:#92400e;}
+  .tag-r{background:var(--mint-light);color:#047857;}
+
+  /* === FOOTER === */
+  .ftr{margin-top:16px;padding:12px 18px;border-radius:var(--r);background:#fff;border:1px solid var(--g200);display:flex;justify-content:space-between;font-size:.72rem;color:var(--g400);}
+</style>
+</head>
+<body>
+
+<div class="hdr">
+  <div class="hdr-left">
+    <div class="hdr-icon">🏥</div>
+    <div><div class="hdr-title">森森的健康档案</div><div class="hdr-sub">个人健康档案管理系统</div></div>
+  </div>
+  <div class="hdr-right"><div class="hdr-label">建档日期</div><div class="hdr-date">2026-04-15</div></div>
+</div>
+
+<div class="main">
+  <div id="view-sensen" class="member-view">
+    
+    <!-- 1. INFO BAR -->
+    <div class="info">
+      <div class="info-cell"><div class="info-label">年龄/性别</div><div class="info-val">27岁 女</div></div>
+      <div class="info-cell"><div class="info-label">血压 (mmHg)</div><div class="info-val">138/88 <span style="font-size:0.7rem;color:var(--amber)">↑偏高</span></div></div>
+      <div class="info-cell"><div class="info-label">BMI/腰围</div><div class="info-val">26.9 / 91cm</div></div>
+      <div class="info-cell"><div class="info-label">心率</div><div class="info-val">82次/分</div></div>
+      <div class="info-cell"><div class="info-label">整体状态</div><div class="info-val"><span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);margin-right:4px;"></span>重点关注</div></div>
+    </div>
+
+    <!-- 2. CATEGORY TABS -->
+    <div class="cat-tabs">
+      <button class="cat-tab active" onclick="switchCat('cat-metabolism', 'view-sensen', this)"><span class="ct-dot ct-bad"></span>代谢与营养</button>
+      <button class="cat-tab" onclick="switchCat('cat-lipid', 'view-sensen', this)"><span class="ct-dot ct-bad"></span>血脂</button>
+      <button class="cat-tab" onclick="switchCat('cat-liver', 'view-sensen', this)"><span class="ct-dot ct-warn"></span>肝胆</button>
+      <button class="cat-tab" onclick="switchCat('cat-thyroid', 'view-sensen', this)"><span class="ct-dot ct-warn"></span>甲状腺</button>
+      <button class="cat-tab" onclick="switchCat('cat-imaging', 'view-sensen', this)"><span class="ct-dot ct-warn"></span>影像与视力</button>
+      <button class="cat-tab" onclick="switchCat('cat-sugar', 'view-sensen', this)"><span class="ct-dot ct-ok"></span>糖代谢</button>
+      <button class="cat-tab" onclick="switchCat('cat-kidney', 'view-sensen', this)"><span class="ct-dot ct-ok"></span>肾功能</button>
+      <button class="cat-tab" onclick="switchCat('cat-routine', 'view-sensen', this)"><span class="ct-dot ct-ok"></span>血尿常规</button>
+    </div>
+
+    <!-- 3. PANELS -->
+
+    <!-- METABOLISM & NUTRITION -->
+    <div class="cat-panel" id="cat-metabolism">
+      <div class="split">
+        <div class="panel">
+          <div class="panel-head">⚖️ 体重代谢与营养</div>
+          <table class="ind-tbl">
+            <thead><tr><th>指标</th><th>最新</th><th>日期</th><th>参考</th><th>状态</th><th></th></tr></thead>
+            <tbody>
+              <tr class="clickable" onclick="toggleRow(this)"><td>BMI 体质指数</td><td class="v-high" style="color:var(--red)">26.9</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>18.5~23.9</td><td><span class="badge b-hi">⬆ 超重</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>BMI达到26.9，属于超重（近轻度肥胖标准28）。配合腰围91cm（参考≤84.99），提示明显的中心性肥胖。</p><div class="tip tip-warn">⚠️ 肥胖是导致脂肪肝、高尿酸和血脂异常的根本原因，建议首要任务是减脂。</div></div></div></td></tr>
+              
+              <tr class="clickable" onclick="toggleRow(this)"><td>尿酸 (UA)</td><td class="v-high" style="color:var(--red)">476</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>210~420</td><td><span class="badge b-hi">⬆ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>年轻女性尿酸高往往与代谢综合征、高果糖/高嘌呤饮食、或体重过大相关。</p><div class="tip tip-warn">⚠️ 建议每日饮水>2000ml，减少果汁、海鲜、浓汤摄入。</div></div></div></td></tr>
+
+              <tr class="clickable" onclick="toggleRow(this)"><td>25-OH 维生素D</td><td class="v-low" style="color:var(--red)">16.8</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>≥20</td><td><span class="badge b-lo">⬇ 缺乏</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>维D不足会影响钙吸收，且与免疫力下降、代谢缓慢有关。</p><div class="tip tip-bad">🔴 建议口服维生素D制剂，并适当增加户外日晒。</div></div></div></td></tr>
+
+              <tr class="clickable" onclick="toggleRow(this)"><td>超敏C反应蛋白</td><td class="v-high" style="color:var(--amber)">7.2</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>0~6</td><td><span class="badge b-warn">↗ 略高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row"><td colspan="6"><div class="detail-inner"><div class="d-interp"><p>hs-CRP轻度升高，提示体内可能存在低水平的慢性炎症。肥胖和代谢综合征常伴有此现象。</p></div></div></td></tr>
+            </tbody>
+          </table>
+          <div class="ok-bar">
+            <div class="ok-chip">血钾/钠/氯 <b>正常</b> <span class="ok">✓</span></div>
+            <div class="ok-chip">血钙 <b>2.32</b> <span class="ok">✓</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">📈 核心代谢指标趋势</div>
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;">BMI (超重)</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar amb" style="width:50%" data-tip="24.7"></div></div><div class="t-val">24.7</div></div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:70%" data-tip="26.9"></div></div><div class="t-val" style="color:var(--red)">26.9 <span class="t-arrow">↗</span></div></div>
+          
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;margin-top:6px;">尿酸 (高尿酸血症)</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar amb" style="width:60%" data-tip="386"></div></div><div class="t-val">386</div></div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:80%" data-tip="476"></div></div><div class="t-val" style="color:var(--red)">476 <span class="t-arrow">↗</span></div></div>
+
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;margin-top:6px;">维生素D (缺乏)</div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:30%" data-tip="16.8"></div></div><div class="t-val" style="color:var(--red)">16.8</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIPID -->
+    <div class="cat-panel" id="cat-lipid" style="display:none;">
+      <div class="split">
+        <div class="panel">
+          <div class="panel-head">❤️ 血脂</div>
+          <table class="ind-tbl">
+            <thead><tr><th>指标</th><th>最新</th><th>日期</th><th>参考</th><th>状态</th><th></th></tr></thead>
+            <tbody>
+              <tr class="clickable" onclick="toggleRow(this)"><td>总胆固醇 (TC)</td><td class="v-high">6.35</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>&lt;5.2</td><td><span class="badge b-hi">⬆ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>总胆固醇明显超标，结合其他血脂异常，提示存在混合型高脂血症。</p></div></div></td></tr>
+              
+              <tr class="clickable" onclick="toggleRow(this)"><td>甘油三酯 (TG)</td><td class="v-high">2.76</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>0.45~1.70</td><td><span class="badge b-hi">⬆ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>甘油三酯升高主要与饮食中碳水化合物过多、饮酒及体重超标直接相关。</p><div class="tip tip-warn">⚠️ 控制主食量，减少奶茶/甜品摄入。</div></div></div></td></tr>
+
+              <tr class="clickable" onclick="toggleRow(this)"><td>低密度脂蛋白 (LDL-C)</td><td class="v-high">3.92</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>0~3.37</td><td><span class="badge b-hi">⬆ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>促发动脉粥样硬化的主要"坏胆固醇"。超标需引起足够重视，特别是合并血压偏高时。</p></div></div></td></tr>
+
+              <tr class="clickable" onclick="toggleRow(this)"><td>载脂蛋白B</td><td class="v-high" style="color:var(--amber)">1.31</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>0.6~1.1</td><td><span class="badge b-warn">↗ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row"><td colspan="6"><div class="detail-inner"><div class="d-interp"><p>ApoB与LDL-C呈正相关，升高同样增加心血管风险。</p></div></div></td></tr>
+            </tbody>
+          </table>
+          <div class="ok-bar">
+            <div class="ok-chip">高密度脂蛋白(HDL-C) <b>1.18</b> <span class="ok">✓</span></div>
+            <div class="ok-chip">载脂蛋白A1 <b>1.25</b> <span class="ok">✓</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">📈 关键血脂指标趋势</div>
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;">总胆固醇</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar red" style="width:65%" data-tip="5.52"></div></div><div class="t-val" style="color:var(--red)">5.52</div></div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:80%" data-tip="6.35"></div></div><div class="t-val" style="color:var(--red)">6.35 <span class="t-arrow">↗</span></div></div>
+          
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;margin-top:6px;">甘油三酯</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar red" style="width:65%" data-tip="2.58"></div></div><div class="t-val" style="color:var(--red)">2.58</div></div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:75%" data-tip="2.76"></div></div><div class="t-val" style="color:var(--red)">2.76 <span class="t-arrow">↗</span></div></div>
+
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;margin-top:6px;">LDL-C ("坏胆固醇")</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar red" style="width:50%" data-tip="3.41"></div></div><div class="t-val" style="color:var(--red)">3.41</div></div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:65%" data-tip="3.92"></div></div><div class="t-val" style="color:var(--red)">3.92 <span class="t-arrow">↗</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIVER -->
+    <div class="cat-panel" id="cat-liver" style="display:none;">
+      <div class="split">
+        <div class="panel">
+          <div class="panel-head">🫁 肝胆</div>
+          <table class="ind-tbl">
+            <thead><tr><th>指标</th><th>最新</th><th>日期</th><th>参考</th><th>状态</th><th></th></tr></thead>
+            <tbody>
+              <tr class="clickable" onclick="toggleRow(this)"><td>腹部彩超</td><td class="v-border" style="color:var(--amber)">轻度脂肪肝</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>正常</td><td><span class="badge b-warn">⚠ 异常</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>超声提示肝脏前场回声增强，后场回声衰减，为典型脂肪肝表现。与肥胖和血脂异常互为因果。</p></div></div></td></tr>
+
+              <tr class="clickable" onclick="toggleRow(this)"><td>ALT 谷丙转氨酶</td><td class="v-high">53</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>0~50</td><td><span class="badge b-hi">⬆ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>转氨酶轻度偏高，说明脂肪肝已经引起了轻度的肝细胞损伤。AST（38）也处于参考值高位。</p><div class="tip tip-warn">⚠️ 切勿盲目服用保肝药，核心是减重降脂。</div></div></div></td></tr>
+
+              <tr class="clickable" onclick="toggleRow(this)"><td>GGT 谷氨酰转移酶</td><td class="v-high">65</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>10~60</td><td><span class="badge b-hi">⬆ 偏高</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row"><td colspan="6"><div class="detail-inner"><div class="d-interp"><p>GGT偏高同样常见于脂肪肝、饮酒或肥胖人群。</p></div></div></td></tr>
+            </tbody>
+          </table>
+          <div class="ok-bar">
+            <div class="ok-chip">AST 谷草转氨酶 <b>38</b> <span class="ok">✓</span></div>
+            <div class="ok-chip">碱性磷酸酶 <b>78</b> <span class="ok">✓</span></div>
+            <div class="ok-chip">胆红素(总/直/间) <b>正常</b> <span class="ok">✓</span></div>
+            <div class="ok-chip">蛋白(总/白/球) <b>正常</b> <span class="ok">✓</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">📈 肝功趋势</div>
+          <div style="padding:6px 18px;font-size:.72rem;color:var(--g500);font-weight:600;">ALT</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar red" style="width:52%" data-tip="52"></div></div><div class="t-val" style="color:var(--red)">52</div></div>
+          <div class="trend-row" style="background:var(--red-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar red" style="width:55%" data-tip="53"></div></div><div class="t-val" style="color:var(--red)">53 <span class="t-arrow">↗</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- THYROID -->
+    <div class="cat-panel" id="cat-thyroid" style="display:none;">
+      <div class="split">
+        <div class="panel">
+          <div class="panel-head">🦋 甲状腺</div>
+          <table class="ind-tbl">
+            <thead><tr><th>指标</th><th>最新</th><th>日期</th><th>参考</th><th>状态</th><th></th></tr></thead>
+            <tbody>
+              <tr class="clickable" onclick="toggleRow(this)"><td>甲状腺彩超</td><td class="v-border" style="color:var(--amber)">结节(3×2mm)</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td>正常</td><td><span class="badge b-warn">⚠ 结节</span></td><td><span class="arr">▼</span></td></tr>
+              <tr class="detail-row show"><td colspan="6"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>右侧叶见低回声结节 3mm×2mm，边界清晰。这是极小的结节（仅米粒大小）。</p><div class="tip tip-ok">✅ 边界清晰多为良性，且甲功血液检查完全正常。无需过度紧张，每年随访超声即可。</div></div></div></td></tr>
+            </tbody>
+          </table>
+          <div class="ok-bar">
+            <div class="ok-chip">TSH <b>2.89</b> <span class="ok">✓</span></div>
+            <div class="ok-chip">FT4 <b>15.6</b> <span class="ok">✓</span></div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">📈 TSH 趋势</div>
+          <div class="trend-row"><div class="t-label">2025-10</div><div class="t-bars"><div class="t-bar grn" style="width:38%" data-tip="2.63"></div></div><div class="t-val">2.63</div></div>
+          <div class="trend-row" style="background:var(--mint-light);border-radius:6px;"><div class="t-label"><b>2026-04</b></div><div class="t-bars"><div class="t-bar grn" style="width:40%" data-tip="2.89"></div></div><div class="t-val" style="color:var(--mint)">2.89 <span class="t-arrow">↗</span></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMAGING & VISION -->
+    <div class="cat-panel" id="cat-imaging" style="display:none;">
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">🔬 影像与视力</div>
+        <table class="ind-tbl">
+          <thead><tr><th>项目</th><th>检查所见</th><th>日期</th><th>状态</th><th></th></tr></thead>
+          <tbody>
+            <tr class="clickable" onclick="toggleRow(this)"><td>眼科视力</td><td class="v-border">裸眼 R0.3 / L0.2</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td><span class="badge b-warn">⚠ 欠佳</span></td><td><span class="arr">▼</span></td></tr>
+            <tr class="detail-row show"><td colspan="5"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>矫正视力（戴镜）右 0.9、左 0.8。存在近视及可能的散光。</p><div class="tip tip-warn">⚠️ 建议日常注意用眼卫生，若眼镜度数不匹配建议重新验配。</div></div></div></td></tr>
+
+            <tr class="clickable" onclick="toggleRow(this)"><td>颈椎 DR</td><td class="v-border">生理曲度变直</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td><span class="badge b-warn">⚠ 异常</span></td><td><span class="arr">▼</span></td></tr>
+            <tr class="detail-row show"><td colspan="5"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>颈椎生理曲度变直是长期伏案、低头玩手机的典型表现。易引起颈背部酸痛僵硬。</p><div class="tip tip-warn">⚠️ 避免久坐低头，适度做颈部拉伸、打羽毛球或游泳。</div></div></div></td></tr>
+
+            <tr class="clickable" onclick="toggleRow(this)"><td>胸部 DR</td><td class="v-border">双肺纹理增多</td><td style="color:var(--g400);font-size:.75rem;">2026-04</td><td><span class="badge b-warn">⚠ 异常</span></td><td><span class="arr">▼</span></td></tr>
+            <tr class="detail-row show"><td colspan="5"><div class="detail-inner" style="max-height:600px;opacity:1;padding:16px 18px;"><div class="d-interp"><p>心影无增大。双肺纹理增多常见于支气管轻度炎症、吸烟或吸入粉尘。无明显咳嗽咳痰症状一般无需特殊处理。</p></div></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SUGAR -->
+    <div class="cat-panel" id="cat-sugar" style="display:none;">
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">🍬 糖代谢 — 全部正常</div>
+        <div class="ok-bar">
+          <div class="ok-chip">空腹血糖 (FBG) <b>5.50</b> <span class="ok">✓</span> <span class="note">参考:3.9-6.1</span></div>
+          <div class="ok-chip">糖化血红蛋白 (HbA1c) <b>5.6%</b> <span class="ok">✓</span> <span class="note">参考:4.0-6.0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KIDNEY -->
+    <div class="cat-panel" id="cat-kidney" style="display:none;">
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">🫘 肾功能 — 肾小球滤过率极佳</div>
+        <div class="ok-bar">
+          <div class="ok-chip">尿素 (UREA) <b>5.32</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">肌酐 (Cr) <b>79</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">估算肾小球滤过率 <b>98</b> <span class="ok">✓</span></div>
+        </div>
+        <div style="padding:16px 18px;font-size:0.8rem;color:var(--g500);">注：尿酸异常已归入【代谢与营养】模块统一管理。</div>
+      </div>
+    </div>
+
+    <!-- ROUTINE -->
+    <div class="cat-panel" id="cat-routine" style="display:none;">
+      <div class="panel" style="margin-bottom:14px;">
+        <div class="panel-head">🩸 血尿常规 — 各项均在正常范围</div>
+        <div class="ok-bar">
+          <div class="ok-chip">白细胞(WBC) <b>6.8</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">红细胞(RBC) <b>5.12</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">血红蛋白(Hb) <b>161</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">血小板(PLT) <b>258</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">尿常规全套 (蛋白/隐血/糖等) <b>均阴性</b> <span class="ok">✓</span></div>
+          <div class="ok-chip">尿pH <b>6.2</b> <span class="ok">✓</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. BOTTOM: RISKS + PLAN -->
+    <div class="bottom">
+      <div class="bcard">
+        <div class="bcard-title">⚠️ 重点关注</div>
+        <div class="risk risk-hi"><div class="risk-icon">🔴</div><div><div class="risk-t">代谢综合征加重</div><div class="risk-d">对比半年前，超重 (BMI 24.7→26.9) + 混合型高脂血症 (TC 5.52→6.35, LDL-C 3.41→3.92) + 高尿酸 (386→476) 均呈恶化趋势。这是相互关联的整体代谢异常。</div></div></div>
+        <div class="risk risk-hi"><div class="risk-icon">🔴</div><div><div class="risk-t">血压临界偏高</div><div class="risk-d">138/88 mmHg，处于正常高值范围，接近高血压诊断标准（半年前为 124/81，呈明显上升趋势），给心脑血管增加压力。</div></div></div>
+        <div class="risk risk-md"><div class="risk-icon">🟡</div><div><div class="risk-t">维生素D缺乏</div><div class="risk-d">16.8 ng/mL (应≥20)。不利于骨骼健康和免疫调节。</div></div></div>
+        <div class="risk risk-md"><div class="risk-icon">🟡</div><div><div class="risk-t">甲状腺结节 & 颈椎病</div><div class="risk-d">右叶微小结节(3x2mm)边界清，大概率良性；颈椎生理曲度变直需改善坐姿。</div></div></div>
+      </div>
+      <div class="bcard">
+        <div class="bcard-title">🔄 行动与复查计划</div>
+        <div class="plan"><div class="plan-n">1</div><div><div class="plan-t">饮食控制与减重减脂</div><div class="plan-d">严格控制碳水与脂肪摄入，戒除含糖饮料与酒精，每周≥150分钟运动。这是改善一切代谢指标的核心。</div><span class="plan-tag tag-u">立即执行</span></div></div>
+        <div class="plan"><div class="plan-n">2</div><div><div class="plan-t">补充维生素D3</div><div class="plan-d">建议开始服用维D补充剂，多晒太阳。</div><span class="plan-tag tag-u">立即执行</span></div></div>
+        <div class="plan"><div class="plan-n">3</div><div><div class="plan-t">血压日常监测</div><div class="plan-d">建议购买家用血压计，每周自测1-2次早晚血压。</div><span class="plan-tag tag-s">日常关注</span></div></div>
+        <div class="plan"><div class="plan-n">4</div><div><div class="plan-t">肝功、血脂、尿酸复查</div><div class="plan-d">验证生活方式改善的成果。若3个月后仍居高不下，需就医考虑药物干预。</div><span class="plan-tag tag-s">3个月后</span></div></div>
+        <div class="plan"><div class="plan-n">5</div><div><div class="plan-t">甲状腺及腹部超声随访</div><div class="plan-d">观察结节大小变化及脂肪肝程度。</div><span class="plan-tag tag-r">12个月内</span></div></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  function switchCat(catId, viewId, btn) {
+    const view = document.getElementById(viewId);
+    view.querySelectorAll('.cat-panel').forEach(p => p.style.display = 'none');
+    view.querySelectorAll('.cat-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById(catId).style.display = '';
+    btn.classList.add('active');
+  }
+
+  function toggleRow(tr) {
+    const detail = tr.nextElementSibling;
+    if (detail && detail.classList.contains('detail-row')) {
+      detail.classList.toggle('show');
+      tr.classList.toggle('expanded');
+    }
+  }
+</script>
+</body>
+</html>
