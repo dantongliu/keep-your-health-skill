@@ -52,7 +52,8 @@
 
 为了让你直观感受到这个 Skill 的强大，我们在项目中内置了一个真实的生成样例文件。
 
-你可以直接下载或在浏览器中打开 [examples/demo-report.html](examples/demo-report.html) 进行体验。
+你可以直接点击这里在线体验：👉 **[在线预览 Demo：森森的健康档案](https://htmlpreview.github.io/?https://github.com/dantongliu/keep-your-health-skill/blob/main/examples/demo-report.html)** 👈
+
 在这个样例中你可以亲自操作：
 *   查看 2025 年 10 月与 2026 年 4 月的多期历史数据合并与趋势对比。
 *   把鼠标悬停在右侧趋势图的彩色柱状条上，体验数值气泡（Tooltip）。
